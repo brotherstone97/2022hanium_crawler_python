@@ -25,7 +25,17 @@ def show_detail(driver):
                                        f'//*[@id="con_body"]/div[2]/div[3]/div[3]/table/tbody/tr[{j}]/td[2]/span[2]/a')
             popup_URL = name.get_attribute('href')
             print(popup_URL)
+            driver.get(url=popup_URL)
 
+            ######테스트용 dict
+            save_tester = {}
+            for k in range(1,5):
+                title_xpath = f'//*[@id="content"]/section/div[1]/div[2]/table/tbody/tr[{k}]/th'
+                contents_xpath = f'//*[@id="content"]/section/div[1]/div[2]/table/tbody/tr[{k}]/td'
+                title = driver.find_element(By.XPATH, title_xpath)
+                contents = driver.find_element(By.XPATH, contents_xpath)
+                save_tester[title.text]=contents.text
+            print(save_tester)
 
 # 최대 페이지 정보를 얻기 위함.(onclick attribute의 value이용)
 def get_last_page():
@@ -68,7 +78,7 @@ def mfds_total_drug(driver):
     search_xpath = '//*[@id="searchGrain"]/fieldset/div[8]/button[1]'
     search = driver.find_element(By.XPATH, search_xpath)
 
-    for i in range(2, 12):
+    for i in range(2, 3): #original stop number-> 12 / tester stop number-> 3
         # 알약 타입 클릭 -> 검색 클릭
         type = driver.find_element(By.XPATH, f'//*[@id="drugShapeList"]/li[{i}]/a')
         type.click()
