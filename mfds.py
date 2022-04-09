@@ -29,13 +29,27 @@ def show_detail(driver):
 
             ######테스트용 dict
             save_tester = {}
-            for k in range(1,5):
+
+            #이미지 xpath
+            image_xpath = ['// *[ @ id = "scroll_01"] / div / div / img',
+                           '// *[ @ id = "scroll_01"] / div / div / img[1]']
+
+            #이미지가 하나일 때와 2개 이상일 때의 xpath가 다르므로 예외처리로 커버해준다. 첫번째 사진을 가져옴
+            try:
+                image = driver.find_element(By.XPATH, image_xpath[0])
+                save_tester['image'] = image.get_attribute('src')
+            except:
+                image = driver.find_element(By.XPATH, image_xpath[1])
+                save_tester['image'] = image.get_attribute('src')
+
+            for k in range(1, 5):
                 title_xpath = f'//*[@id="content"]/section/div[1]/div[2]/table/tbody/tr[{k}]/th'
                 contents_xpath = f'//*[@id="content"]/section/div[1]/div[2]/table/tbody/tr[{k}]/td'
                 title = driver.find_element(By.XPATH, title_xpath)
                 contents = driver.find_element(By.XPATH, contents_xpath)
-                save_tester[title.text]=contents.text
+                save_tester[title.text] = contents.text
             print(save_tester)
+
 
 # 최대 페이지 정보를 얻기 위함.(onclick attribute의 value이용)
 def get_last_page():
@@ -78,7 +92,7 @@ def mfds_total_drug(driver):
     search_xpath = '//*[@id="searchGrain"]/fieldset/div[8]/button[1]'
     search = driver.find_element(By.XPATH, search_xpath)
 
-    for i in range(2, 3): #original stop number-> 12 / tester stop number-> 3
+    for i in range(2, 3):  # original stop number-> 12 / tester stop number-> 3
         # 알약 타입 클릭 -> 검색 클릭
         type = driver.find_element(By.XPATH, f'//*[@id="drugShapeList"]/li[{i}]/a')
         type.click()
