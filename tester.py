@@ -12,17 +12,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from mfds import mfds_total_drug
 # from kpic import kpic_total_drug
 
-# 의약품안전나라(식약처) URL
-# URL = 'https://nedrug.mfds.go.kr/searchDrug'
-# 약학정보원 URL
-# URL = 'https://www.health.kr/searchIdentity/search.asp'
-
 driver = webdriver.Chrome(executable_path='./chromedriver.exe')
 
 mfds_total_drug(driver)
 
 
-# driver.close()
+driver.close()
 
 # implictly waits
 # driver.implicitly_wait(time_to_wait=3)

@@ -6,9 +6,13 @@ from selenium.webdriver.support import expected_conditions as EC
 def show_detail(driver):
     last_page = get_last_page()
 
+    # 모든 페이지를 순회하기 위한 반복문. i - 1 = 현재 페이지
     for i in range(last_page):
-        # 의약품 테이블의 tr태그 개수를 세기 위함
-        tbody = driver.find_element(By.XPATH, '//*[@id="con_body"]/div[2]/div[3]/div[3]/table/tbody')
+        # 페이지당 테이블은 하나. 이때 tbody의 xpath
+        tbody_xpath = '//*[@id="con_body"]/div[2]/div[3]/div[3]/table/tbody'
+        tbody = driver.find_element(By.XPATH, tbody_xpath)
+
+        # tbody에 속한 tr(약물)의 개수
         number_of_row = len(tbody.find_elements(By.TAG_NAME, 'tr'))
 
         # 조회결과가 없을 때 함수 종료
@@ -16,25 +20,26 @@ def show_detail(driver):
             return
         print(number_of_row)
 
-        ######테스트용 number_of_row
+        ######테스트용 number_of_row. 후에 삭제 예정
         number_of_row = 1
 
-        # tr태그 개수 만큼 반복
+        # tr태그(약물) 개수 만큼 반복
         for j in range(1, number_of_row + 1):
+            # 약물 상세정보 pop-up의 링크가 담겨있는 a태그(약물이름)
             name = driver.find_element(By.XPATH,
                                        f'//*[@id="con_body"]/div[2]/div[3]/div[3]/table/tbody/tr[{j}]/td[2]/span[2]/a')
             popup_URL = name.get_attribute('href')
             print(popup_URL)
             driver.get(url=popup_URL)
 
-            ######테스트용 dict
+            ######테스트 저장용 dict 후에 DB에 저장예정
             save_tester = {}
 
-            #이미지 xpath
+            # 이미지 xpath
             image_xpath = ['// *[ @ id = "scroll_01"] / div / div / img',
                            '// *[ @ id = "scroll_01"] / div / div / img[1]']
 
-            #이미지가 하나일 때와 2개 이상일 때의 xpath가 다르므로 예외처리로 커버해준다. 첫번째 사진을 가져옴
+            # 이미지가 하나일 때와 2개 이상일 때의 xpath가 다르므로 예외처리로 커버해준다. 개수와 상관없이 첫번째 사진을 가져옴
             try:
                 image = driver.find_element(By.XPATH, image_xpath[0])
                 save_tester['image'] = image.get_attribute('src')
@@ -42,12 +47,18 @@ def show_detail(driver):
                 image = driver.find_element(By.XPATH, image_xpath[1])
                 save_tester['image'] = image.get_attribute('src')
 
+            #약물 상세정보팝업의 기본정보 테이블의 tr을 순회하기 위한 반복문
             for k in range(1, 5):
+                #약물 기본정보테이블의 titles (제품명, 성상, 모양, 업체명 등)
                 title_xpath = f'//*[@id="content"]/section/div[1]/div[2]/table/tbody/tr[{k}]/th'
+                #약물 기본정보테이블의 titles (제품명, 성상, 모양, 업체명 등)에 해당하는 contents (ex:가나릴정, 흰색 원형의 필름코팅정, 영풍제약(주))
                 contents_xpath = f'//*[@id="content"]/section/div[1]/div[2]/table/tbody/tr[{k}]/td'
                 title = driver.find_element(By.XPATH, title_xpath)
                 contents = driver.find_element(By.XPATH, contents_xpath)
                 save_tester[title.text] = contents.text
+
+                print('title'+title.text)
+                print('contents' + contents.text)
             print(save_tester)
 
 
@@ -56,6 +67,7 @@ def get_last_page():
     try:
         last_page = driver.find_element(By.CLASS_NAME, 'page_last')
         last_page_onclick_value = last_page.get_attribute('onclick')
+        # onclick attribute의 value가 없는 경우 단일페이지이므로 1을 반환
         if not last_page_onclick_value:
             return 1
         print(last_page_onclick_value)
@@ -64,14 +76,14 @@ def get_last_page():
         splited_value = last_page_onclick_value.split('(')
         print(splited_value[1][:-1])
         # return splited_value
-        return 1  # 테스트 용 리턴값
+        return 1  # 테스트 용 리턴값 original= splited_value
     except:
         # 항목이 없을 경우
         return 1
 
 
+# 의약품안전나라 의약품 전체 검색하는 함수
 def mfds_total_drug(driver):
-    # 약학정보원 의약품 전체 검색
 
     # 의약품안전나라(식약처) URL
     URL = 'https://nedrug.mfds.go.kr/searchDrug'
@@ -80,9 +92,11 @@ def mfds_total_drug(driver):
 
     print(driver.current_url)
 
-    # 낱알검색 버튼
-    pill_button = driver.find_element(By.XPATH, '//*[@id="con_body"]/div[2]/div[2]/div[1]/ul/li[2]/a')
+    # 낱알검색 버튼의 xpath
+    pill_xpath = '//*[@id="con_body"]/div[2]/div[2]/div[1]/ul/li[2]/a'
+    pill_button = driver.find_element(By.XPATH, pill_xpath)
 
+    #낱알검색 탭 클릭
     pill_button.click()
 
     # 타입별 데이터 갯수저장할 list (테스트용)
@@ -103,9 +117,13 @@ def mfds_total_drug(driver):
         search.click()
 
         show_detail(driver)
-    #     #타입별 갯수
+    #     #타입별 갯수(테스트용)
     #     count = driver.find_element(By.XPATH, '//*[@id="con_body"]/div[2]/div[3]/div[2]/p/strong')
     #     number_of_drug_by_type.append(count.text)
     #
     # for i in range(len(number_of_drug_by_type)):
     #     print(f'type{i + 1}의 의약품 갯수: {number_of_drug_by_type[i]}')
+
+    #약물별 상세정보 팝업의 데이터를 긁어오기 위한 함수
+
+
