@@ -47,23 +47,47 @@ def show_detail(driver):
                 image = driver.find_element(By.XPATH, image_xpath[1])
                 save_tester['image'] = image.get_attribute('src')
 
-            #약물 상세정보팝업의 기본정보 테이블의 tr을 순회하기 위한 반복문
+            # 약물 상세정보팝업의 기본정보 테이블의 tr을 순회하기 위한 반복문
             for k in range(1, 5):
-                #약물 기본정보테이블의 titles (제품명, 성상, 모양, 업체명 등)
+                # 약물 기본정보테이블의 titles (제품명, 성상, 모양, 업체명 등)
                 title_xpath = f'//*[@id="content"]/section/div[1]/div[2]/table/tbody/tr[{k}]/th'
-                #약물 기본정보테이블의 titles (제품명, 성상, 모양, 업체명 등)에 해당하는 contents (ex:가나릴정, 흰색 원형의 필름코팅정, 영풍제약(주))
+                # 약물 기본정보테이블의 titles (제품명, 성상, 모양, 업체명 등)에 해당하는 contents (ex:가나릴정, 흰색 원형의 필름코팅정, 영풍제약(주))
                 contents_xpath = f'//*[@id="content"]/section/div[1]/div[2]/table/tbody/tr[{k}]/td'
                 title = driver.find_element(By.XPATH, title_xpath)
                 contents = driver.find_element(By.XPATH, contents_xpath)
                 save_tester[title.text] = contents.text
 
-                print('title'+title.text)
+                print('title' + title.text)
                 print('contents' + contents.text)
-            #원료약품 및 분량 section의 유효성분 추출
+            # 원료약품 및 분량 section의 유효성분 추출
             active_ingredient_xpath = '// *[ @ id = "scroll_02"] / h3[1]'
-            #유효성분의 성분명만 추출
+            # 유효성분의 성분명만 추출
             active_ingredient = driver.find_element(By.XPATH, active_ingredient_xpath).text.split(':')[1].lstrip()
             save_tester['active_ingredient'] = active_ingredient
+
+            # 효능효과
+            efficacy_xpath = '// *[ @ id = "_ee_doc"]'
+            efficacy = driver.find_element(By.XPATH, efficacy_xpath).text
+            save_tester['efficacy'] = efficacy
+
+            # 용법용량
+            uses_xpath = '// *[ @ id = "_ud_doc"]'
+            uses = driver.find_element(By.XPATH, uses_xpath).text
+            save_tester['uses'] = uses
+
+            # 주의사항
+            precaution_xpath = '//*[@id="_nb_doc"]'
+            precation = driver.find_element(By.XPATH, precaution_xpath).text
+            save_tester['precation'] = precation
+
+            # DUR(의약품 적정 사용 정보)
+            DUR_thead_xpath = '//*[@id="scroll_06"]/table/thead/tr'
+            DUR_thead = driver.find_element(By.XPATH, DUR_thead_xpath)
+            number_of_th = len(DUR_thead.find_element(By.TAG_NAME, 'th'))
+
+            DUR_tbody_xpath = '//*[@id="scroll_06"]/table/tbody/tr'
+            number_of_td = len(DUR_tbody_xpath.find_element(By.TAG_NAME, 'td'))
+
             print(save_tester)
 
 
@@ -89,7 +113,6 @@ def get_last_page():
 
 # 의약품안전나라 의약품 전체 검색하는 함수
 def mfds_total_drug(driver):
-
     # 의약품안전나라(식약처) URL
     URL = 'https://nedrug.mfds.go.kr/searchDrug'
 
@@ -101,7 +124,7 @@ def mfds_total_drug(driver):
     pill_xpath = '//*[@id="con_body"]/div[2]/div[2]/div[1]/ul/li[2]/a'
     pill_button = driver.find_element(By.XPATH, pill_xpath)
 
-    #낱알검색 탭 클릭
+    # 낱알검색 탭 클릭
     pill_button.click()
 
     # 타입별 데이터 갯수저장할 list (테스트용)
@@ -129,6 +152,4 @@ def mfds_total_drug(driver):
     # for i in range(len(number_of_drug_by_type)):
     #     print(f'type{i + 1}의 의약품 갯수: {number_of_drug_by_type[i]}')
 
-    #약물별 상세정보 팝업의 데이터를 긁어오기 위한 함수
-
-
+    # 약물별 상세정보 팝업의 데이터를 긁어오기 위한 함수
