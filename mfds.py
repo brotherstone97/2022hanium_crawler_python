@@ -59,6 +59,11 @@ def show_detail(driver):
 
                 print('title'+title.text)
                 print('contents' + contents.text)
+            #원료약품 및 분량 section의 유효성분 추출
+            active_ingredient_xpath = '// *[ @ id = "scroll_02"] / h3[1]'
+            #유효성분의 성분명만 추출
+            active_ingredient = driver.find_element(By.XPATH, active_ingredient_xpath).text.split(':')[1].lstrip()
+            save_tester['active_ingredient'] = active_ingredient
             print(save_tester)
 
 
