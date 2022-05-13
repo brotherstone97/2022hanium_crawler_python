@@ -5,7 +5,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from db.insert_db import insert_data
 
 def show_detail(driver):
-    last_page = get_last_page()
+    #original code
+    # last_page = get_last_page()
+
+    #test code
+    last_page = 1
 
     # 모든 페이지를 순회하기 위한 반복문. i - 1 = 현재 페이지
     for i in range(last_page):
@@ -22,16 +26,21 @@ def show_detail(driver):
         print(number_of_row)
 
         ######테스트용 number_of_row. 후에 삭제 예정
-        number_of_row = 1
+        # number_of_row = 1
 
         # tr태그(약물) 개수 만큼 반복
         for j in range(1, number_of_row + 1):
             # 약물 상세정보 pop-up의 링크가 담겨있는 a태그(약물이름)
-            name = driver.find_element(By.XPATH,
-                                       f'//*[@id="con_body"]/div[2]/div[3]/div[3]/table/tbody/tr[{j}]/td[2]/span[2]/a')
+
+            name = driver.find_element(By.XPATH,f'//*[@id="con_body"]/div[2]/div[3]/div[3]/table/tbody/tr[{j}]/td[2]/span[2]/a')
             popup_URL = name.get_attribute('href')
             print(popup_URL)
-            driver.get(url=popup_URL)
+
+            #새탭에 팝업창을 열기 위함.
+            script = f"window.open('{popup_URL}')"
+            driver.execute_script(script)
+            #driver의 target을 새탭으로 전환
+            driver.switch_to.window(driver.window_handles[1])
 
             ######테스트 저장용 dict 후에 DB에 저장예정
             save_tester = {}
@@ -119,9 +128,13 @@ def show_detail(driver):
                 #한 row가 지나면 dict를 save_tester['DUR]에 append하도록 함
                 save_tester['DUR'].append(list_element)
             print(save_tester)
-
+            #크롤링 후 새탭 닫기
+            driver.close()
             #db에 저장
-            # insert_data(save_tester)
+            insert_data(save_tester)
+            #다시 원래 페이지로 target전환
+            driver.switch_to.window(driver.window_handles[0])
+
 
 
 # 최대 페이지 정보를 얻기 위함.(onclick attribute의 value이용)
