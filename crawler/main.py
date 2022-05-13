@@ -12,7 +12,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from mfds import mfds_total_drug
 # from kpic import kpic_total_drug
 
-driver = webdriver.Chrome(executable_path='./chromedriver.exe')
+driver = webdriver.Chrome(executable_path='../chromedriver.exe')
 
 mfds_total_drug(driver)
 

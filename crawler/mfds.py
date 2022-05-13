@@ -2,6 +2,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from db.insert_db import insert_data
 
 def show_detail(driver):
     last_page = get_last_page()
@@ -77,8 +78,8 @@ def show_detail(driver):
 
             # 주의사항
             precaution_xpath = '//*[@id="_nb_doc"]'
-            precation = driver.find_element(By.XPATH, precaution_xpath).text
-            save_tester['precation'] = precation
+            precaution = driver.find_element(By.XPATH, precaution_xpath).text
+            save_tester['precaution'] = precaution
 
             # DUR(의약품 적정 사용 정보)
             DUR_thead_xpath = '//*[@id="scroll_06"]/table/thead/tr'
@@ -103,9 +104,11 @@ def show_detail(driver):
                     td_contents_xpath_prefix = f'// *[ @ id = "scroll_06"] / table / tbody / tr[{i}] /'
                 #
                 list_element = {}
+                #요소로 들어갈 dict의 key로 th태그 text를 사용하기 위한 반복문
                 for j in range(1, number_of_th + 1):
                     head_name_xpath = f'// *[ @ id = "scroll_06"] / table / thead / tr / th[{j}]'
                     head_name = driver.find_element(By.XPATH, head_name_xpath).text
+                    #dict의 value로 들어갈 td태그의 하위 태그가 없을 경우를 대비한 예외처리
                     try:
                         td_contents_xpath = f'{td_contents_xpath_prefix} td[{j}] / span[2] | {td_contents_xpath_prefix} td[{j}] / a'
                         td_contents = driver.find_element(By.XPATH, td_contents_xpath).text
@@ -113,8 +116,12 @@ def show_detail(driver):
                     except:
                         list_element[head_name] = ''
                     print('list_element: ', list_element)
+                #한 row가 지나면 dict를 save_tester['DUR]에 append하도록 함
                 save_tester['DUR'].append(list_element)
             print(save_tester)
+
+            #db에 저장
+            # insert_data(save_tester)
 
 
 # 최대 페이지 정보를 얻기 위함.(onclick attribute의 value이용)

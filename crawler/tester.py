@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-driver = webdriver.Chrome(executable_path='chromedriver.exe')
+driver = webdriver.Chrome(executable_path='../chromedriver.exe')
 
 URL = 'https://nedrug.mfds.go.kr/pbp/CCBBB01/getItemDetail?itemSeq=202105574'
 
