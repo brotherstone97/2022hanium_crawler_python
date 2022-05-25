@@ -127,6 +127,11 @@ def show_detail(driver):
                     print('list_element: ', list_element)
                 #한 row가 지나면 dict를 save_tester['DUR]에 append하도록 함
                 save_tester['DUR'].append(list_element)
+            #column name 한글 -> 영어
+            save_tester['product_name'] = save_tester.pop('제품명')
+            save_tester['appearance'] = save_tester.pop('성상')
+            save_tester['shape'] = save_tester.pop('모양')
+            save_tester['manufacturer'] = save_tester.pop('업체명')
             print(save_tester)
             #크롤링 후 새탭 닫기
             driver.close()
