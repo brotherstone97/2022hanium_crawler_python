@@ -2,9 +2,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from db.insert_db import insert_data
+
 
 def show_detail(driver):
-    last_page = get_last_page()
+    # original code
+    # last_page = get_last_page()
+
+    # test code
+    last_page = 1
 
     # 모든 페이지를 순회하기 위한 반복문. i - 1 = 현재 페이지
     for i in range(last_page):
@@ -21,16 +27,22 @@ def show_detail(driver):
         print(number_of_row)
 
         ######테스트용 number_of_row. 후에 삭제 예정
-        number_of_row = 1
+        # number_of_row = 1
 
         # tr태그(약물) 개수 만큼 반복
         for j in range(1, number_of_row + 1):
             # 약물 상세정보 pop-up의 링크가 담겨있는 a태그(약물이름)
+
             name = driver.find_element(By.XPATH,
                                        f'//*[@id="con_body"]/div[2]/div[3]/div[3]/table/tbody/tr[{j}]/td[2]/span[2]/a')
             popup_URL = name.get_attribute('href')
             print(popup_URL)
-            driver.get(url=popup_URL)
+
+            # 새탭에 팝업창을 열기 위함.
+            script = f"window.open('{popup_URL}')"
+            driver.execute_script(script)
+            # driver의 target을 새탭으로 전환
+            driver.switch_to.window(driver.window_handles[1])
 
             ######테스트 저장용 dict 후에 DB에 저장예정
             save_tester = {}
@@ -77,44 +89,65 @@ def show_detail(driver):
 
             # 주의사항
             precaution_xpath = '//*[@id="_nb_doc"]'
-            precation = driver.find_element(By.XPATH, precaution_xpath).text
-            save_tester['precation'] = precation
+            precaution = driver.find_element(By.XPATH, precaution_xpath).text
+            save_tester['precaution'] = precaution
 
             # DUR(의약품 적정 사용 정보)
-            DUR_thead_xpath = '//*[@id="scroll_06"]/table/thead/tr'
-            DUR_thead = driver.find_element(By.XPATH, DUR_thead_xpath)
-            number_of_th = len(DUR_thead.find_elements(By.TAG_NAME, 'th'))
-
-            DUR_tbody_xpath = '//*[@id="scroll_06"]/table/tbody'
-            DUR_tbody = driver.find_element(By.XPATH, DUR_tbody_xpath)
-            number_of_tbody_tr = len(DUR_tbody.find_elements(By.TAG_NAME, 'tr'))
-            # number_of_tbody_td = len(DUR_tbody.find_elements(By.TAG_NAME, 'td'))
-
-            print('number_of_tbody_tr: ', number_of_tbody_tr)
-
-            #DUR
             save_tester['DUR'] = []
-            # DUR테이블 행 하나당 dict하나로 저장
-            for i in range(1, number_of_tbody_tr + 1):
-                # DUR테이블의 콘텐츠 tr(행)의 개수에 따라 xpath를 다르게 지정.
-                if number_of_tbody_tr <= 1:
-                    td_contents_xpath_prefix = f'// *[ @ id = "scroll_06"] / table / tbody / tr /'
-                else:
-                    td_contents_xpath_prefix = f'// *[ @ id = "scroll_06"] / table / tbody / tr[{i}] /'
-                #
-                list_element = {}
-                for j in range(1, number_of_th + 1):
-                    head_name_xpath = f'// *[ @ id = "scroll_06"] / table / thead / tr / th[{j}]'
-                    head_name = driver.find_element(By.XPATH, head_name_xpath).text
-                    try:
-                        td_contents_xpath = f'{td_contents_xpath_prefix} td[{j}] / span[2] | {td_contents_xpath_prefix} td[{j}] / a'
-                        td_contents = driver.find_element(By.XPATH, td_contents_xpath).text
-                        list_element[head_name] = td_contents
-                    except:
-                        list_element[head_name] = ''
-                    print('list_element: ', list_element)
-                save_tester['DUR'].append(list_element)
+            DUR_thead_xpath = '//*[@id="scroll_06"]/table/thead/tr'
+            # DUR항목이 없는 경우를 대비한 예외처리문
+            try:
+                DUR_thead = driver.find_element(By.XPATH, DUR_thead_xpath)
+            except Exception as e:
+                print(e)
+                save_tester['DUR'].append({})
+            else:
+                number_of_th = len(DUR_thead.find_elements(By.TAG_NAME, 'th'))
+
+                DUR_tbody_xpath = '//*[@id="scroll_06"]/table/tbody'
+                DUR_tbody = driver.find_element(By.XPATH, DUR_tbody_xpath)
+                number_of_tbody_tr = len(DUR_tbody.find_elements(By.TAG_NAME, 'tr'))
+                # number_of_tbody_td = len(DUR_tbody.find_elements(By.TAG_NAME, 'td'))
+
+                print('number_of_tbody_tr: ', number_of_tbody_tr)
+
+                # DUR
+                # save_tester['DUR'] = []
+                # DUR테이블 행 하나당 dict하나로 저장
+                for i in range(1, number_of_tbody_tr + 1):
+                    # DUR테이블의 콘텐츠 tr(행)의 개수에 따라 xpath를 다르게 지정.
+                    if number_of_tbody_tr <= 1:
+                        td_contents_xpath_prefix = f'// *[ @ id = "scroll_06"] / table / tbody / tr /'
+                    else:
+                        td_contents_xpath_prefix = f'// *[ @ id = "scroll_06"] / table / tbody / tr[{i}] /'
+                    #
+                    list_element = {}
+                    # 요소로 들어갈 dict의 key로 th태그 text를 사용하기 위한 반복문
+                    for j in range(1, number_of_th + 1):
+                        head_name_xpath = f'// *[ @ id = "scroll_06"] / table / thead / tr / th[{j}]'
+                        head_name = driver.find_element(By.XPATH, head_name_xpath).text
+                        # dict의 value로 들어갈 td태그의 하위 태그가 없을 경우를 대비한 예외처리
+                        try:
+                            td_contents_xpath = f'{td_contents_xpath_prefix} td[{j}] / span[2] | {td_contents_xpath_prefix} td[{j}] / a'
+                            td_contents = driver.find_element(By.XPATH, td_contents_xpath).text
+                            list_element[head_name] = td_contents
+                        except:
+                            list_element[head_name] = ''
+                        print('list_element: ', list_element)
+                    # 한 row가 지나면 dict를 save_tester['DUR]에 append하도록 함
+                    save_tester['DUR'].append(list_element)
+            # column name 한글 -> 영어
+            save_tester['product_name'] = save_tester.pop('제품명')
+            save_tester['appearance'] = save_tester.pop('성상')
+            save_tester['shape'] = save_tester.pop('모양')
+            save_tester['manufacturer'] = save_tester.pop('업체명')
             print(save_tester)
+            # 크롤링 후 새탭 닫기
+            driver.close()
+            # db에 저장
+            insert_data(save_tester)
+            # 다시 원래 페이지로 target전환
+            driver.switch_to.window(driver.window_handles[0])
 
 
 # 최대 페이지 정보를 얻기 위함.(onclick attribute의 value이용)

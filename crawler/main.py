@@ -21,6 +21,7 @@ chrome_options.add_argument('--disable-dev-shm-usage')
 path = '/usr/bin/chromedriver'
 driver = webdriver.Chrome(executable_path=path, chrome_options=chrome_options)
 
+
 mfds_total_drug(driver)
 
 

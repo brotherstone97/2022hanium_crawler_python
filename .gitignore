@@ -2,4 +2,4 @@ chromedriver.exe
 ./.idea
 ./__pycache__
 ./venv
-./tester.py
+crawler/tester.py
