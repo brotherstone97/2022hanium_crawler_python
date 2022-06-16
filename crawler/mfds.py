@@ -2,8 +2,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from db.insert_db import insert_data
+#python3의 경로문제 해결하기 위한 전처리
+import sys
+from os import path
 
+directory = path.dirname(path.dirname(path.abspath(__file__)))
+print(directory)
+sys.path.append(directory)
+
+from db.insert_db import insert_data
 
 def show_detail(driver):
     # original code
