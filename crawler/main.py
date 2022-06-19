@@ -10,10 +10,12 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 from mfds import mfds_total_drug
+#from kpic import kpic_total_drug
+
 
 import platform
 
-# from kpic import kpic_total_drug
+
 if platform.system()=='Linux':
     #headless 선언
     chrome_options = webdriver.ChromeOptions()
