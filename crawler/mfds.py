@@ -1,9 +1,11 @@
+import platform
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-#python3의 경로문제 해결하기 위한 전처리
+# python3의 경로문제 해결하기 위한 전처리
 import sys
 from os import path
 
@@ -11,7 +13,15 @@ directory = path.dirname(path.dirname(path.abspath(__file__)))
 print(directory)
 sys.path.append(directory)
 
+# explictly waits 로딩되기 전 먼저 실행되는 걸 방지하기 위한 시간 설정
+webdriver_wait_seconds = 0
+if platform.system() == 'Linux':
+    webdriver_wait_seconds = 1.5
+else:
+    webdriver_wait_seconds = 2
+
 from db.insert_db import insert_data
+
 
 def show_detail(driver):
     # original code
