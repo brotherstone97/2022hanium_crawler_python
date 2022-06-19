@@ -4,13 +4,14 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from db.insert_db import insert_data
 
+import time
 
 def show_detail(driver):
     # original code
     # last_page = get_last_page()
 
     # test code
-    last_page = 1
+    last_page = 5
 
     # 모든 페이지를 순회하기 위한 반복문. i - 1 = 현재 페이지
     for i in range(last_page):
@@ -172,6 +173,7 @@ def get_last_page():
 
 # 의약품안전나라 의약품 전체 검색하는 함수
 def mfds_total_drug(driver):
+    start = time.time()
     # 의약품안전나라(식약처) URL
     URL = 'https://nedrug.mfds.go.kr/searchDrug'
 
@@ -193,17 +195,18 @@ def mfds_total_drug(driver):
     search_xpath = '//*[@id="searchGrain"]/fieldset/div[8]/button[1]'
     search = driver.find_element(By.XPATH, search_xpath)
 
-    for i in range(2, 3):  # original stop number-> 12 / tester stop number-> 3
+    for i in range(2, 12):  # original stop number-> 12 / tester stop number-> 3
         # 알약 타입 클릭 -> 검색 클릭
         type = driver.find_element(By.XPATH, f'//*[@id="drugShapeList"]/li[{i}]/a')
         type.click()
         # explictly waits 로딩되기 전 먼저 실행되는 걸 방지하기 위함.
-        search = WebDriverWait(driver, 3).until(
+        search = WebDriverWait(driver, 2).until(
             EC.presence_of_element_located((By.XPATH, search_xpath))
         )
         search.click()
 
         show_detail(driver)
+    print("소요시간: ", time.time() - start)
     #     #타입별 갯수(테스트용)
     #     count = driver.find_element(By.XPATH, '//*[@id="con_body"]/div[2]/div[3]/div[2]/p/strong')
     #     number_of_drug_by_type.append(count.text)

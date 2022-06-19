@@ -10,16 +10,22 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 from mfds import mfds_total_drug
+
+import platform
+
 # from kpic import kpic_total_drug
+if platform.system()=='Linux':
+    #headless 선언
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
 
-#headless 선언
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument('--headless')
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--disable-dev-shm-usage')
-
-path = '/usr/bin/chromedriver'
-driver = webdriver.Chrome(executable_path=path, chrome_options=chrome_options)
+    path = '/usr/bin/chromedriver'
+    driver = webdriver.Chrome(executable_path=path, chrome_options=chrome_options)
+else:
+    path = '../chromedriver.exe'
+    driver = webdriver.Chrome(executable_path=path)
 
 
 mfds_total_drug(driver)
