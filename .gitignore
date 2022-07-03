@@ -3,3 +3,4 @@ chromedriver.exe
 ./__pycache__
 ./venv
 crawler/tester.py
+drive-download-20220221T110530Z-001.zip

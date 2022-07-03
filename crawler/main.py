@@ -15,7 +15,7 @@ from mfds import mfds_total_drug
 
 import platform
 
-
+#Linux일 때 headless로 진행
 if platform.system()=='Linux':
     #headless 선언
     chrome_options = webdriver.ChromeOptions()
