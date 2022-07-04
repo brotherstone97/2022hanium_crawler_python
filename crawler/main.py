@@ -32,7 +32,6 @@ else:
 
 mfds_total_drug(driver)
 
-
 driver.close()
 
 # implictly waits

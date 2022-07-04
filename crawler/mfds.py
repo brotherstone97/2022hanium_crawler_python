@@ -1,13 +1,13 @@
 import platform
 
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 from selenium import webdriver
 
-
-#병렬 작업 처리
+# 병렬 작업 처리
 from concurrent.futures import ThreadPoolExecutor
 
 # python3의 경로문제 해결하기 위한 전처리
@@ -30,16 +30,23 @@ from db.insert_db import insert_data
 
 def show_detail(driver):
     # original code
-    last_page = get_last_page()
+    last_page = get_last_page(driver)
 
+    print(f'last_page: {last_page}')
     # test code
     # last_page = 2
 
     # 모든 페이지를 순회하기 위한 반복문. i - 1 = 현재 페이지
-    for i in range(last_page):
+    for i in range(1, last_page + 1):
         # 페이지당 테이블은 하나. 이때 tbody의 xpath
         tbody_xpath = '//*[@id="con_body"]/div[2]/div[3]/div[3]/table/tbody'
         tbody = driver.find_element(By.XPATH, tbody_xpath)
+
+        current_page = driver.find_element(By.CSS_SELECTOR, '#paging_div > p > a.on')
+        print('='*10)
+        print(f'i: {i}')
+        print(f'current_page: {current_page.text}')
+        print('='*10)
 
         # tbody에 속한 tr(약물)의 개수
         number_of_row = len(tbody.find_elements(By.TAG_NAME, 'tr'))
@@ -52,7 +59,7 @@ def show_detail(driver):
         ######테스트용 number_of_row. 후에 삭제 예정
         # number_of_row = 1
 
-        #여러 팝업을 병렬로 처리하기 위한 함수
+        # 여러 팝업을 병렬로 처리하기 위한 함수
         def multi_popup(row_count):
             print("called multi popup func")
             # Linux일 때 headless로 진행
@@ -107,7 +114,8 @@ def show_detail(driver):
             # 원료약품 및 분량 section의 유효성분 추출
             active_ingredient_xpath = '// *[ @ id = "scroll_02"] / h3[1]'
             # 유효성분의 성분명만 추출
-            active_ingredient = driver_for_popup.find_element(By.XPATH, active_ingredient_xpath).text.split(':')[1].lstrip()
+            active_ingredient = driver_for_popup.find_element(By.XPATH, active_ingredient_xpath).text.split(':')[
+                1].lstrip()
             save_tester['active_ingredient'] = active_ingredient
 
             # 효능효과
@@ -178,7 +186,6 @@ def show_detail(driver):
 
             driver_for_popup.close()
             insert_data(save_tester)
-
 
             # # 새탭에 팝업창을 열기 위함.
             # script = f"window.open('{popup_URL}')"
@@ -310,29 +317,37 @@ def show_detail(driver):
         #     # 다시 원래 페이지로 target전환
         #     driver.switch_to.window(driver.window_handles[0])
         #     print(f'팝업 처리 시간: {time.time() - popup_open_time}')
-        #병럴 처리 구문(max_workers==default)
+        # 병럴 처리 구문(max_workers==default)
         with ThreadPoolExecutor() as executor:
             # print(f'executor._max_workers: {executor._max_workers}')
-            for row in range(1,number_of_row+1):
+            for row in range(1, number_of_row + 1):
+                print(f'Current Row: {row}')
                 executor.submit(multi_popup, row)
+                print('\n')
+
+        next_page = driver.find_element(By.XPATH, '//*[@id="paging_div"]/p/button[3]')
+        driver.execute_script("arguments[0].click();", next_page)
+
 
 # 최대 페이지 정보를 얻기 위함.(onclick attribute의 value이용)
-def get_last_page():
+def get_last_page(driver):
     try:
-        last_page = driver.find_element(By.CLASS_NAME, 'page_last')
-        last_page_onclick_value = last_page.get_attribute('onclick')
+        last_page_element = driver.find_element(By.CLASS_NAME, 'page_last')
+        last_page_onclick_value = last_page_element.get_attribute('onclick')
         # onclick attribute의 value가 없는 경우 단일페이지이므로 1을 반환
         if not last_page_onclick_value:
             return 1
-        print(last_page_onclick_value)
+        print(f'last_page_onclick_value: {last_page_onclick_value}')
 
         # value에서 정수만을 추출하기 위함
         splited_value = last_page_onclick_value.split('(')
-        print(splited_value[1][:-1])
-        # return splited_value
-        return 1  # 테스트 용 리턴값 original= splited_value
+        print(f'splited_value: {splited_value}')
+        last_page = int(splited_value[1][:-1])
+        return last_page
+        # return 1  # 테스트 용 리턴값 original= last_page
     except:
         # 항목이 없을 경우
+        print("exception occurred")
         return 1
 
 
